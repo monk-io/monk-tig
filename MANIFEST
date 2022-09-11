@@ -1,0 +1,3 @@
+REPO monk-tig
+LOAD manifest.yaml
+RESOURCES files/dashboards.yaml files/datasources.yaml files/home_of_all_dashboards.json files/telegraf.conf files/telegraf.json

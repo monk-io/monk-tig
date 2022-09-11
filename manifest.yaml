@@ -1,0 +1,137 @@
+namespace: tigmonitoring
+
+metadata:
+  name: Telegraf, InfluxDB, Grafana(TIG) Stack
+  publisher: monk.io
+  description: A monitoring stack using popular open source tools with preconfigured telegraf dashboards.
+
+common:
+  variables:
+    influx-host:
+      type: string
+      value: <- get-hostname("tigmonitoring/influxdb", "influxdb")
+    influx-admin-user:
+      value: admin
+      type: string
+    influx-admin-pass:
+      type: string
+      value: adminz
+    influx-http-auth-enabled:
+      type: string
+      value: true
+    grafana-admin-user:
+      value: admin
+      type: string
+    grafana-admin-password:
+      type: string
+      value: adminz
+    grafana-install-plugins:
+      type: string
+      value: grafana-clock-panel,grafana-simple-json-datasource
+    grafana-anonymous:
+      type: string
+      value: true
+    grafana-anonymous-role:
+      type: string
+      value: Viewer
+
+telegraf:
+  defines: runnable
+  inherits: tigmonitoring/common
+
+  containers:
+    telegraf:
+      image: telegraf
+      image-tag: 1.23-alpine
+      ports:
+      - 8125:8125/udp
+
+  files:
+    datasource:
+      container: telegraf
+      mode: 0644
+      path: /etc/telegraf/telegraf.conf
+      contents: <<< files/telegraf.conf
+
+influxdb:
+  defines: runnable
+  inherits: tigmonitoring/common
+
+  containers:
+    influxdb:
+      environment:
+        - INFLUXDB_DB=influx
+        - <- `INFLUXDB_ADMIN_USER=${influx-admin-user}`
+        - <- `INFLUXDB_ADMIN_PASSWORD=${influx-admin-pass}`
+        - <- `INFLUXDB_HTTP_AUTH_ENABLED=${influx-http-auth-enabled}`
+
+      image: influxdb
+      image-tag: "1.8"
+      ports:
+      - 8086:8086
+      paths:
+        - <- `${monk-volume-path}/influxdb/var-lib-influxdb:/var/lib/influxdb`
+        - <- `${monk-volume-path}/influxdb/etc-influxdb:/etc/influxdb`
+
+  # volumes:
+  #   influxdb:
+  #     size: 200
+  #     kind: SSD
+  #     path: <- `${monk-volume-path}/influxdb`
+  #     backup:
+  #       rotation-days: 5
+  #       every: 1
+  #       kind: day
+  #       start-time: 03:00
+  #       start-day: MONDAY
+
+grafana:
+  defines: runnable
+  inherits: tigmonitoring/common
+
+  containers:
+    grafana:
+      environment:
+      - GF_AUTH_ANONYMOUS_HIDE_VERSION=true
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/dashboards/home_of_all_dashboards.json
+      - <- `GF_AUTH_ANONYMOUS_ORG_ROLE=${grafana-anonymous-role}`
+      - <- `GF_AUTH_ANONYMOUS_ENABLED=${grafana-anonymous}`
+      - <- `GF_SECURITY_ADMIN_USER=${grafana-admin-user}`
+      - <- `GF_SECURITY_ADMIN_PASSWORD=${grafana-admin-password}`
+      - <- `GF_INSTALL_PLUGINS=${grafana-install-plugins}`
+      image: docker.io/grafana/grafana
+      ports:
+      - 3000:3000
+      image-tag: latest
+
+  files:
+    datasource:
+      container: grafana
+      mode: 0644
+      path: /etc/grafana/provisioning/datasources/datasources.yaml
+      contents: <<< files/datasources.yaml
+    
+    dashboard:
+      container: grafana
+      mode: 0644
+      path: /etc/grafana/provisioning/dashboards/dashboards.yaml
+      contents: <<< files/dashboards.yaml
+    
+    dashboard_telegraf:
+      container: grafana
+      mode: 0644
+      path: /etc/grafana/dashboards/telegraf.json
+      contents: <<< files/telegraf.json
+
+    dashboard_home:
+      container: grafana
+      mode: 0644
+      path: /etc/grafana/dashboards/home_of_all_dashboards.json
+      contents: <<< files/home_of_all_dashboards.json
+
+stack:
+  defines: process-group
+  runnable-list:
+    - tigmonitoring/grafana
+    - tigmonitoring/telegraf
+    - tigmonitoring/influxdb
