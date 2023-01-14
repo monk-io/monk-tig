@@ -6,10 +6,15 @@ metadata:
   description: A monitoring stack using popular open source tools with preconfigured telegraf dashboards.
 
 common:
+  connections:
+    influxdb:
+      runnable: tigmonitoring/influxdb
+      service: influxdb
+
   variables:
     influx-host:
       type: string
-      value: <- get-hostname("tigmonitoring/influxdb", "influxdb")
+      value: <- connection-hostname("influxdb")
     influx-admin-user:
       value: admin
       type: string
@@ -39,12 +44,18 @@ telegraf:
   defines: runnable
   inherits: tigmonitoring/common
 
+  services:
+    telegraf:
+      container: telegraf
+      port: 8125
+      protocol: udp
+
   containers:
     telegraf:
       image: telegraf
       image-tag: 1.23-alpine
-      ports:
-      - 8125:8125/udp
+      # ports:
+      # - 8125:8125/udp
 
   files:
     datasource:
@@ -57,6 +68,12 @@ influxdb:
   defines: runnable
   inherits: tigmonitoring/common
 
+  services:
+    influxdb:
+      container: influxdb
+      port: 8086
+      protocol: tcp
+
   containers:
     influxdb:
       environment:
@@ -67,8 +84,8 @@ influxdb:
 
       image: influxdb
       image-tag: "1.8"
-      ports:
-      - 8086:8086
+      # ports:
+      # - 8086:8086
       paths:
         - <- `${monk-volume-path}/influxdb/var-lib-influxdb:/var/lib/influxdb`
         - <- `${monk-volume-path}/influxdb/etc-influxdb:/etc/influxdb`
@@ -89,6 +106,13 @@ grafana:
   defines: runnable
   inherits: tigmonitoring/common
 
+  services:
+    grafana:
+      container: grafana
+      port: 3000
+      protocol: tcp
+      host-port: 3000
+
   containers:
     grafana:
       environment:
@@ -101,7 +125,7 @@ grafana:
       - <- `GF_INSTALL_PLUGINS=${grafana-install-plugins}`
       image: docker.io/grafana/grafana
       ports:
-      - 3000:3000
+        - 3000:3000
       image-tag: latest
 
   files:
@@ -110,13 +134,13 @@ grafana:
       mode: 0644
       path: /etc/grafana/provisioning/datasources/datasources.yaml
       contents: <<< files/datasources.yaml
-    
+
     dashboard:
       container: grafana
       mode: 0644
       path: /etc/grafana/provisioning/dashboards/dashboards.yaml
       contents: <<< files/dashboards.yaml
-    
+
     dashboard_telegraf:
       container: grafana
       mode: 0644
