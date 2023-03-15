@@ -1,10 +1,5 @@
 namespace: tigmonitoring
 
-metadata:
-  name: Telegraf, InfluxDB, Grafana(TIG) Stack
-  publisher: monk.io
-  description: A monitoring stack using popular open source tools with preconfigured telegraf dashboards.
-
 common:
   connections:
     influxdb:
@@ -44,6 +39,9 @@ telegraf:
   defines: runnable
   inherits: tigmonitoring/common
 
+  metadata:
+    private: true
+
   services:
     telegraf:
       container: telegraf
@@ -67,6 +65,9 @@ telegraf:
 influxdb:
   defines: runnable
   inherits: tigmonitoring/common
+
+  metadata:
+    private: true
 
   services:
     influxdb:
@@ -105,6 +106,9 @@ influxdb:
 grafana:
   defines: runnable
   inherits: tigmonitoring/common
+
+  metadata:
+    private: true
 
   services:
     grafana:
@@ -155,6 +159,12 @@ grafana:
 
 stack:
   defines: process-group
+
+  metadata:
+    name: Telegraf, InfluxDB, Grafana(TIG) Stack
+    publisher: monk.io
+    description: A monitoring stack using popular open source tools with preconfigured telegraf dashboards.
+
   runnable-list:
     - tigmonitoring/grafana
     - tigmonitoring/telegraf
