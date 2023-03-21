@@ -163,11 +163,18 @@ stack:
   metadata:
     name: Telegraf, InfluxDB, Grafana(TIG) Stack
     publisher: monk.io
-    description: A monitoring stack using popular open source tools with preconfigured telegraf dashboards.
+    description: |
+      The TIG Stack is an acronym that refers to three software tools - Telegraf, InfluxDB, and Grafana.
+
+      InfluxDB, built using the Go programming language, is a freely available time-series database that enables fast, high-availability storage of large volumes of time-stamped data. It is used extensively for DevOps monitoring, log data, application metrics, and real-time analytics.
+
+      Telegraf is an agent designed to gather, process, aggregate, and write metrics, with support for various output plugins, including Graphite, Kafka, and InfluxDB.
+
+      Grafana is an open-source data visualization and monitoring suite that supports multiple databases, including Elasticsearch, Graphite, Prometheus, and InfluxDB. It allows users to create customizable dashboards with analytics and metrics, making it an ideal tool for managing and monitoring app or infrastructure performance.
     tags: monitoring, telegraf, grafana, influxdb, tig
-    website: https://www.influxdata.com/time-series-platform/telegraf/ https://grafana.com/ https://www.influxdata.com/
-    source: https://github.com/influxdata/telegraf https://github.com/grafana/grafana https://github.com/influxdata/influxdb
-    icon: https://assets.monk.io/icons/zookeper.gif
+    # website: https://www.influxdata.com/time-series-platform/telegraf/ https://grafana.com/ https://www.influxdata.com/
+    # source: https://github.com/influxdata/telegraf https://github.com/grafana/grafana https://github.com/influxdata/influxdb
+    # icon: https://assets.monk.io/icons/zookeper.gif
 
   runnable-list:
     - tigmonitoring/grafana
