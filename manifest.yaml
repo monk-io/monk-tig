@@ -164,6 +164,10 @@ stack:
     name: Telegraf, InfluxDB, Grafana(TIG) Stack
     publisher: monk.io
     description: A monitoring stack using popular open source tools with preconfigured telegraf dashboards.
+    tags: monitoring, telegraf, grafana, influxdb, tig
+    website: https://www.influxdata.com/time-series-platform/telegraf/ https://grafana.com/ https://www.influxdata.com/
+    source: https://github.com/influxdata/telegraf https://github.com/grafana/grafana https://github.com/influxdata/influxdb
+    icon: https://assets.monk.io/icons/zookeper.gif
 
   runnable-list:
     - tigmonitoring/grafana
