@@ -1,3 +1,4 @@
+---
 namespace: tigmonitoring
 
 common:
@@ -5,7 +6,6 @@ common:
     influxdb:
       runnable: tigmonitoring/influxdb
       service: influxdb
-
   variables:
     influx-host:
       type: string
@@ -38,23 +38,28 @@ common:
 telegraf:
   defines: runnable
   inherits: tigmonitoring/common
-
   metadata:
     private: true
-
+    name: Telegraf
+    publisher: monk.io
+    description: |
+      Telegraf is an open-source data collector designed to gather metrics and data from a wide variety of sources, including operating systems, databases, network devices, and sensors.
+      It supports a range of data formats and protocols, including Graphite, InfluxDB, Prometheus, and more, making it highly adaptable to different data collection and storage needs.
+      Telegraf also offers a plugin architecture, allowing users to easily extend its functionality and support for additional data sources.
+      With its lightweight design and low resource usage, Telegraf is an efficient and versatile tool for collecting and processing metrics in modern data-driven environments.
+    tags: Metrics, Monitoring, Plugins, Ingestion, IoT, DevOps, Alerting, Analytics
+    icon: https://www.influxdata.com/images/influxdata_full_navy-a7ca2ff4.svg
   services:
     telegraf:
       container: telegraf
       port: 8125
       protocol: udp
-
   containers:
     telegraf:
       image: telegraf
       image-tag: 1.23-alpine
       # ports:
       # - 8125:8125/udp
-
   files:
     datasource:
       container: telegraf
@@ -65,16 +70,23 @@ telegraf:
 influxdb:
   defines: runnable
   inherits: tigmonitoring/common
-
   metadata:
     private: true
-
+    website: https://www.influxdata.com/
+    name: InfluxDB
+    icon: https://www.influxdata.com/images/influxdata_full_navy-a7ca2ff4.svg
+    publisher: monk.io
+    description: |
+      InfluxDB is a high-performance, distributed time-series database that is designed to handle large amounts of data with high write and query throughput.
+      It is optimized for storing and querying time-stamped data and provides a SQL-like query language called InfluxQL, as well as a HTTP API for data ingestion and retrieval.
+      InfluxDB also includes features like retention policies, continuous queries, and downsampling, making it an ideal choice for monitoring and analytics use cases.
+    source: https://github.com/influxdata/influxdb
+    tags: Data storage, Data retrieval, Data analytics, Monitoring, IoT, DevOps, Metrics
   services:
     influxdb:
       container: influxdb
       port: 8086
       protocol: tcp
-
   containers:
     influxdb:
       environment:
@@ -82,9 +94,8 @@ influxdb:
         - <- `INFLUXDB_ADMIN_USER=${influx-admin-user}`
         - <- `INFLUXDB_ADMIN_PASSWORD=${influx-admin-pass}`
         - <- `INFLUXDB_HTTP_AUTH_ENABLED=${influx-http-auth-enabled}`
-
       image: influxdb
-      image-tag: "1.8"
+      image-tag: '1.8'
       # ports:
       # - 8086:8086
       paths:
@@ -106,51 +117,55 @@ influxdb:
 grafana:
   defines: runnable
   inherits: tigmonitoring/common
-
   metadata:
     private: true
-
+    website: https://grafana.com
+    name: Grafana
+    icon: https://grafana.com/static/assets/internal/grafana_logo-web-white-text.svg
+    publisher: monk.io
+    description: |
+      Grafana is an open-source data visualization and analytics platform that allows users to create, explore, and share dashboards and graphs from a wide range of data sources. It is a popular tool for monitoring and analyzing metrics, logs, and other time-series data from various sources, including databases, cloud services, and IoT devices.
+      Grafana provides a user-friendly interface that allows users to create and customize visualizations using a wide range of options and plugins. It offers support for multiple data sources, including Prometheus, Graphite, Elasticsearch, InfluxDB, and many others.
+      Grafana allows users to create custom dashboards that display real-time data and provide insights into the health and performance of their systems. It offers a variety of visualization options, including graphs, tables, heatmaps, and alerts, and allows users to create custom alerts that trigger notifications based on predefined conditions.
+      Grafana is highly scalable and can be deployed in a variety of environments, including on-premise, cloud, and hybrid environments. It offers integrations with other popular tools such as Prometheus, Kubernetes, and Docker, making it a versatile and powerful tool for monitoring and analyzing complex distributed systems. Overall, Grafana is an essential tool for any organization looking to monitor and analyze their data effectively.
+    source: https://github.com/grafana/grafana
+    tags: monitoring, exporter, prometheus, grafana
   services:
     grafana:
       container: grafana
       port: 3000
       protocol: tcp
       host-port: 3000
-
   containers:
     grafana:
       environment:
-      - GF_AUTH_ANONYMOUS_HIDE_VERSION=true
-      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/dashboards/home_of_all_dashboards.json
-      - <- `GF_AUTH_ANONYMOUS_ORG_ROLE=${grafana-anonymous-role}`
-      - <- `GF_AUTH_ANONYMOUS_ENABLED=${grafana-anonymous}`
-      - <- `GF_SECURITY_ADMIN_USER=${grafana-admin-user}`
-      - <- `GF_SECURITY_ADMIN_PASSWORD=${grafana-admin-password}`
-      - <- `GF_INSTALL_PLUGINS=${grafana-install-plugins}`
+        - GF_AUTH_ANONYMOUS_HIDE_VERSION=true
+        - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/dashboards/home_of_all_dashboards.json
+        - <- `GF_AUTH_ANONYMOUS_ORG_ROLE=${grafana-anonymous-role}`
+        - <- `GF_AUTH_ANONYMOUS_ENABLED=${grafana-anonymous}`
+        - <- `GF_SECURITY_ADMIN_USER=${grafana-admin-user}`
+        - <- `GF_SECURITY_ADMIN_PASSWORD=${grafana-admin-password}`
+        - <- `GF_INSTALL_PLUGINS=${grafana-install-plugins}`
       image: docker.io/grafana/grafana
       ports:
         - 3000:3000
       image-tag: latest
-
   files:
     datasource:
       container: grafana
       mode: 0644
       path: /etc/grafana/provisioning/datasources/datasources.yaml
       contents: <<< files/datasources.yaml
-
     dashboard:
       container: grafana
       mode: 0644
       path: /etc/grafana/provisioning/dashboards/dashboards.yaml
       contents: <<< files/dashboards.yaml
-
     dashboard_telegraf:
       container: grafana
       mode: 0644
       path: /etc/grafana/dashboards/telegraf.json
       contents: <<< files/telegraf.json
-
     dashboard_home:
       container: grafana
       mode: 0644
@@ -159,23 +174,16 @@ grafana:
 
 stack:
   defines: process-group
-
   metadata:
     name: Telegraf, InfluxDB, Grafana(TIG) Stack
     publisher: monk.io
     description: |
       The TIG Stack is an acronym that refers to three software tools - Telegraf, InfluxDB, and Grafana.
-
       InfluxDB, built using the Go programming language, is a freely available time-series database that enables fast, high-availability storage of large volumes of time-stamped data. It is used extensively for DevOps monitoring, log data, application metrics, and real-time analytics.
-
       Telegraf is an agent designed to gather, process, aggregate, and write metrics, with support for various output plugins, including Graphite, Kafka, and InfluxDB.
-
       Grafana is an open-source data visualization and monitoring suite that supports multiple databases, including Elasticsearch, Graphite, Prometheus, and InfluxDB. It allows users to create customizable dashboards with analytics and metrics, making it an ideal tool for managing and monitoring app or infrastructure performance.
     tags: monitoring, telegraf, grafana, influxdb, tig
-    # website: https://www.influxdata.com/time-series-platform/telegraf/ https://grafana.com/ https://www.influxdata.com/
-    # source: https://github.com/influxdata/telegraf https://github.com/grafana/grafana https://github.com/influxdata/influxdb
-    # icon: https://assets.monk.io/icons/zookeper.gif
-
+    icon: https://www.influxdata.com/images/influxdata_full_navy-a7ca2ff4.svg
   runnable-list:
     - tigmonitoring/grafana
     - tigmonitoring/telegraf

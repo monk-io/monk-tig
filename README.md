@@ -1,5 +1,5 @@
 Telegraf, InfluxDB & Grafana meets Monk
-===
+=======================================
 
 This repository contains Monk.io template to deploy TIG stack system either locally or on cloud of your choice (AWS, GCP, Azure, Digital Ocean).
 
@@ -15,6 +15,7 @@ This repository contains Monk.io template to deploy TIG stack system either loca
   - [Persistency](#persistency)
 
 ## Prerequisites
+
 - [Install Monk](https://docs.monk.io/docs/get-monk)
 - [Register and Login Monk](https://docs.monk.io/docs/acc-and-auth)
 - [Add Cloud Provider](https://docs.monk.io/docs/cloud-provider)
@@ -22,7 +23,7 @@ This repository contains Monk.io template to deploy TIG stack system either loca
 
 ### Make sure monkd is running.
 
-``` bash
+```bash
 $ monk status
 daemon: ready
 auth: logged in
@@ -31,20 +32,20 @@ not connected to cluster
 
 ### Clone Repository
 
-``` bash
+```bash
 $ git clone git@github.com:CuteAnonymousPanda/monk-tig.git
 ```
 
 ### Load Template
 
-``` bash
+```bash
 $ cd monk-tig
 monk load manifest.yaml
 ```
 
 ### Verify if it's loaded correctly
 
-``` bash
+```bash
 $ monk list -l tigmonitoring
 
 ✔ Got the list
@@ -57,7 +58,7 @@ runnable  tigmonitoring/telegraf  local       -        -
 
 ## Deploy Stack
 
-``` bash
+```bash
 $ monk run tigmonitoring/stack
 ✔ Starting the job: local/tigmonitoring/stack... DONE
 ✔ Preparing nodes DONE
@@ -116,11 +117,12 @@ You can quickly setup by editing the values there.
 
 ## Stop, remove and clean up workloads and templates
 
-``` bash
+```bash
 monk purge    tigmonitoring/grafana tigmonitoring/influxdb tigmonitoring/stack tigmonitoring/telegraf
 monk purge -x tigmonitoring/grafana tigmonitoring/influxdb tigmonitoring/stack tigmonitoring/telegraf
 ```
 
 ## Persistency
+
 If you're using any of the clouds available via Monk. You can use volume definition to spin a disk block device to make your TIG instance independent from the node it's running on.
 To do simply uncomment the `volume` blocks in `manifest.yaml`
