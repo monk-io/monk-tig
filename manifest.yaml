@@ -58,8 +58,6 @@ telegraf:
     telegraf:
       image: telegraf
       image-tag: 1.23-alpine
-      # ports:
-      # - 8125:8125/udp
   files:
     datasource:
       container: telegraf
@@ -96,23 +94,9 @@ influxdb:
         - <- `INFLUXDB_HTTP_AUTH_ENABLED=${influx-http-auth-enabled}`
       image: influxdb
       image-tag: '1.8'
-      # ports:
-      # - 8086:8086
       paths:
         - <- `${monk-volume-path}/influxdb/var-lib-influxdb:/var/lib/influxdb`
         - <- `${monk-volume-path}/influxdb/etc-influxdb:/etc/influxdb`
-
-  # volumes:
-  #   influxdb:
-  #     size: 200
-  #     kind: SSD
-  #     path: <- `${monk-volume-path}/influxdb`
-  #     backup:
-  #       rotation-days: 5
-  #       every: 1
-  #       kind: day
-  #       start-time: 03:00
-  #       start-day: MONDAY
 
 grafana:
   defines: runnable
@@ -147,8 +131,6 @@ grafana:
         - <- `GF_SECURITY_ADMIN_PASSWORD=${grafana-admin-password}`
         - <- `GF_INSTALL_PLUGINS=${grafana-install-plugins}`
       image: docker.io/grafana/grafana
-      ports:
-        - 3000:3000
       image-tag: latest
   files:
     datasource:
