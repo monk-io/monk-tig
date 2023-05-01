@@ -11,29 +11,29 @@ common:
       type: string
       value: <- connection-hostname("influxdb")
     influx-admin-user:
-      value: admin
+      value: <- $influx-admin-user default("admin")
       type: string
     influx-admin-pass:
       type: string
-      value: adminz
+      value: <- $influx-admin-pass default("adminz")
     influx-http-auth-enabled:
       type: string
-      value: true
+      value: <- $influx-http-auth-enabled default(true)
     grafana-admin-user:
-      value: admin
+      value: <- $grafana-admin-user default("admin")
       type: string
     grafana-admin-password:
       type: string
-      value: adminz
+      value: <- $grafana-admin-password default("adminz")
     grafana-install-plugins:
       type: string
-      value: grafana-clock-panel,grafana-simple-json-datasource
+      value: <- $grafana-install-plugins default("grafana-clock-panel,grafana-simple-json-datasource")
     grafana-anonymous:
       type: string
-      value: true
+      value: <- $grafana-anonymous default(true)
     grafana-anonymous-role:
       type: string
-      value: Viewer
+      value: <- $grafana-anonymous-role default("Viewer")
 
 telegraf:
   defines: runnable
@@ -164,6 +164,24 @@ stack:
       InfluxDB, built using the Go programming language, is a freely available time-series database that enables fast, high-availability storage of large volumes of time-stamped data. It is used extensively for DevOps monitoring, log data, application metrics, and real-time analytics.
       Telegraf is an agent designed to gather, process, aggregate, and write metrics, with support for various output plugins, including Graphite, Kafka, and InfluxDB.
       Grafana is an open-source data visualization and monitoring suite that supports multiple databases, including Elasticsearch, Graphite, Prometheus, and InfluxDB. It allows users to create customizable dashboards with analytics and metrics, making it an ideal tool for managing and monitoring app or infrastructure performance.
+
+      ---
+
+      Notes:
+
+      Variables:
+
+      | Variable                 | Description                                  | Default                                               |
+      | ------------------------ | -------------------------------------------- | ----------------------------------------------------- |
+      | influx-admin-user        | Influxdb admin username                      | admin                                                 |
+      | influx-admin-pass        | Influxdb admin password                      | adminz                                                |
+      | influx-http-auth-enabled | Influxdb enable authentication               | true                                                  |
+      | grafana-admin-user       | Default grafana Administrator username       | admin                                                 |
+      | grafana-admin-password   | Default grafana Administrator password       | adminz                                                |
+      | grafana-install-plugins  | Default grafana plugins to install           | grafana-clock-panel,grafana-simple-json-datasource    |
+      | grafana-anonymous        | Should we enable anonymous access            | true                                                  |
+      | grafana-anonymous-role   | Role of the anonymous user                   | Viewer                                                |
+
     tags: monitoring, telegraf, grafana, influxdb, tig
     icon: https://www.influxdata.com/images/influxdata_full_navy-a7ca2ff4.svg
   runnable-list:
