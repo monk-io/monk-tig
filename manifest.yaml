@@ -47,7 +47,7 @@ telegraf:
       It supports a range of data formats and protocols, including Graphite, InfluxDB, Prometheus, and more, making it highly adaptable to different data collection and storage needs.
       Telegraf also offers a plugin architecture, allowing users to easily extend its functionality and support for additional data sources.
       With its lightweight design and low resource usage, Telegraf is an efficient and versatile tool for collecting and processing metrics in modern data-driven environments.
-    tags: Metrics, Monitoring, Plugins, Ingestion, IoT, DevOps, Alerting, Analytics
+    tags: metrics, alerting, analytics, ingestion, monitoring, plugins, devops, iot
     icon: https://www.influxdata.com/images/influxdata_full_navy-a7ca2ff4.svg
   services:
     telegraf:
@@ -79,7 +79,7 @@ influxdb:
       It is optimized for storing and querying time-stamped data and provides a SQL-like query language called InfluxQL, as well as a HTTP API for data ingestion and retrieval.
       InfluxDB also includes features like retention policies, continuous queries, and downsampling, making it an ideal choice for monitoring and analytics use cases.
     source: https://github.com/influxdata/influxdb
-    tags: Data storage, Data retrieval, Data analytics, Monitoring, IoT, DevOps, Metrics
+    tags: metrics, data retrieval, data storage, data analytics, monitoring, devops, iot
   services:
     influxdb:
       container: influxdb
@@ -113,7 +113,7 @@ grafana:
       Grafana allows users to create custom dashboards that display real-time data and provide insights into the health and performance of their systems. It offers a variety of visualization options, including graphs, tables, heatmaps, and alerts, and allows users to create custom alerts that trigger notifications based on predefined conditions.
       Grafana is highly scalable and can be deployed in a variety of environments, including on-premise, cloud, and hybrid environments. It offers integrations with other popular tools such as Prometheus, Kubernetes, and Docker, making it a versatile and powerful tool for monitoring and analyzing complex distributed systems. Overall, Grafana is an essential tool for any organization looking to monitor and analyze their data effectively.
     source: https://github.com/grafana/grafana
-    tags: monitoring, exporter, prometheus, grafana
+    tags: prometheus, grafana, monitoring, exporter
   services:
     grafana:
       container: grafana
@@ -182,7 +182,7 @@ stack:
       | grafana-anonymous        | Should we enable anonymous access            | true                                                  |
       | grafana-anonymous-role   | Role of the anonymous user                   | Viewer                                                |
 
-    tags: monitoring, telegraf, grafana, influxdb, tig
+    tags: grafana, telegraf, tig, influxdb, monitoring
     icon: https://www.influxdata.com/images/influxdata_full_navy-a7ca2ff4.svg
   runnable-list:
     - tigmonitoring/grafana
