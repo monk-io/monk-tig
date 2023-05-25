@@ -79,7 +79,7 @@ influxdb:
       It is optimized for storing and querying time-stamped data and provides a SQL-like query language called InfluxQL, as well as a HTTP API for data ingestion and retrieval.
       InfluxDB also includes features like retention policies, continuous queries, and downsampling, making it an ideal choice for monitoring and analytics use cases.
     source: https://github.com/influxdata/influxdb
-    tags: metrics, data retrieval, data storage, data analytics, monitoring, devops, iot
+    tags: metrics, data retrieval, data storage, data analytics, monitoring, devops
   services:
     influxdb:
       container: influxdb
