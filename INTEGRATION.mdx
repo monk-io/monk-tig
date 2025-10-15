@@ -1,0 +1,235 @@
+---
+title: TIG Stack (Telegraf + InfluxDB + Grafana)
+description: Ready-to-run TIG stack template for time-series metrics collection, storage, and visualization.
+primary_category: monitoring
+tags: [telegraf, influxdb, grafana, monitoring, metrics, template, runnable, time-series, observability]
+integration_type: template
+hosting_models: [self-hosted]
+website_url: https://www.influxdata.com/
+docs_url: https://docs.influxdata.com/
+publisher: monk.io
+---
+
+## Overview
+
+This template provides a production‑ready TIG (Telegraf, InfluxDB, Grafana) monitoring stack as Monk runnables. You can:
+
+- Run it directly to get a complete time-series monitoring solution
+- Inherit it in your own infrastructure to collect, store, and visualize metrics
+
+The TIG stack combines Telegraf (metrics collection agent), InfluxDB (time-series database), and Grafana (visualization) to provide a powerful, purpose-built monitoring platform for time-series data.
+
+## What this template manages
+
+- Telegraf agents for metrics collection
+- InfluxDB for time-series data storage
+- Grafana for visualization and dashboards
+- Pre-configured data sources and inputs
+- Persistent storage for time-series data
+
+## Quick start (run directly)
+
+1) Load templates
+
+```bash
+monk load MANIFEST
+```
+
+2) Run the TIG stack
+
+```bash
+monk run tig/stack
+```
+
+3) Customize credentials (recommended via inheritance)
+
+Running directly uses the defaults defined in this template's `variables`. Secrets added with `monk secrets add` will not affect this runnable unless you inherit it and reference those secrets.
+
+- Preferred: inherit and replace variables with `secret("...")` as shown below.
+- Alternative: fork/clone and edit the `variables` in the manifest, then `monk load MANIFEST` and run.
+
+Once started:
+- InfluxDB UI: `http://localhost:8086`
+- Grafana UI: `http://localhost:3000` (default: admin/admin)
+
+## Configuration
+
+Key variables you can customize in this template:
+
+```yaml
+variables:
+  # InfluxDB
+  influxdb-image-tag: "latest"        # InfluxDB image tag
+  influxdb-port: "8086"               # InfluxDB HTTP API port
+  influxdb-org: "myorg"               # organization name
+  influxdb-bucket: "metrics"          # default bucket
+  influxdb-admin-token: "..."         # admin token (env: DOCKER_INFLUXDB_INIT_ADMIN_TOKEN)
+  influxdb-retention: "30d"           # data retention period
+  
+  # Telegraf
+  telegraf-image-tag: "latest"        # Telegraf image tag
+  telegraf-interval: "10s"            # collection interval
+  
+  # Grafana
+  grafana-image-tag: "latest"         # Grafana image tag
+  grafana-port: "3000"                # Grafana UI port
+  grafana-admin-password: "..."       # admin password (env: GF_SECURITY_ADMIN_PASSWORD)
+```
+Data is persisted under `${monk-volume-path}/influxdb`, `${monk-volume-path}/grafana`, and `${monk-volume-path}/telegraf` on the host.
+
+## Use by inheritance (recommended for monitoring)
+
+Inherit the TIG stack to monitor your infrastructure and declare connections. Example:
+
+```yaml
+namespace: myapp
+monitoring:
+  defines: runnable
+  inherits: tig/stack
+  variables:
+    influxdb-admin-token:
+      value: <- secret("influxdb-token")
+    grafana-admin-password:
+      value: <- secret("grafana-password")
+api:
+  defines: runnable
+  containers:
+    api:
+      image: myorg/api
+  connections:
+    metrics:
+      runnable: monitoring
+      service: influxdb
+  variables:
+    influxdb-host:
+      value: <- connection-hostname("metrics")
+    influxdb-token:
+      value: <- secret("influxdb-token")
+```
+
+Then set the secrets once and run your app group:
+
+```bash
+monk secrets add -g influxdb-token="STRONG_TOKEN"
+monk secrets add -g grafana-password="STRONG_PASSWORD"
+monk run myapp/api
+```
+
+## Ports and connectivity
+
+- Service: `influxdb` on TCP port `8086` (HTTP API)
+- Service: `grafana` on TCP port `3000`
+- Telegraf communicates with InfluxDB internally
+- From other runnables in the same process group, use `connection-hostname("<connection-name>")` to resolve service hosts.
+
+## Persistence and configuration
+
+- InfluxDB data path: `${monk-volume-path}/influxdb:/var/lib/influxdb2`
+- Grafana data path: `${monk-volume-path}/grafana:/var/lib/grafana`
+- Telegraf config path: `${monk-volume-path}/telegraf:/etc/telegraf`
+- You can customize Telegraf inputs and outputs by modifying the configuration files in the Telegraf config path.
+
+## Features
+
+### Telegraf
+- 200+ input plugins (system, Docker, databases, APIs)
+- Multiple output plugins
+- Data transformation and aggregation
+- Lightweight and efficient
+
+### InfluxDB
+- Purpose-built time-series database
+- High write and query performance
+- Flux query language
+- Automatic data downsampling
+- Retention policies
+- Clustering and HA support
+
+### Grafana
+- Beautiful dashboards
+- InfluxDB native integration
+- Alerting and notifications
+- Templating and variables
+
+## Telegraf Configuration
+
+Example Telegraf inputs:
+
+```toml
+[[inputs.cpu]]
+  percpu = true
+  totalcpu = true
+
+[[inputs.disk]]
+  ignore_fs = ["tmpfs", "devtmpfs"]
+
+[[inputs.mem]]
+
+[[inputs.docker]]
+  endpoint = "unix:///var/run/docker.sock"
+
+[[outputs.influxdb_v2]]
+  urls = ["http://influxdb:8086"]
+  token = "$INFLUXDB_TOKEN"
+  organization = "myorg"
+  bucket = "metrics"
+```
+
+## InfluxDB Query Example
+
+Using Flux:
+
+```flux
+from(bucket: "metrics")
+  |> range(start: -1h)
+  |> filter(fn: (r) => r._measurement == "cpu")
+  |> aggregateWindow(every: 1m, fn: mean)
+```
+
+## Use cases
+
+The TIG stack excels at:
+- Infrastructure monitoring (CPU, memory, disk, network)
+- Container and Kubernetes monitoring
+- IoT sensor data collection
+- Application performance monitoring
+- Custom metrics collection
+- Real-time dashboards
+
+
+## Related templates
+
+- Use `prometheus/` for alternative metrics collection and storage
+- Combine with `loki/` for log aggregation alongside metrics
+- Integrate with `alertmanager/` for advanced alerting capabilities
+
+## Troubleshooting
+
+- If you changed `influxdb-admin-token` or `grafana-admin-password` but the containers have existing data, authentication may fail. Either reset the data volumes or update the credentials inside the respective services to match.
+- Ensure the host volumes are writable by the container users.
+- Access InfluxDB UI at `http://localhost:8086`
+- Check Telegraf is collecting:
+
+```bash
+monk logs -l 100 tig/telegraf
+```
+
+- Query InfluxDB:
+
+```bash
+influx query 'from(bucket:"metrics") |> range(start:-5m) |> limit(n:10)'
+```
+
+- Check logs:
+
+```bash
+monk logs -l 500 -f tig/influxdb
+monk logs -l 500 -f tig/telegraf
+monk logs -l 500 -f tig/grafana
+```
+
+- For missing metrics:
+  - Verify Telegraf configuration
+  - Check InfluxDB token permissions
+  - Ensure network connectivity between components
+- For Grafana issues, verify InfluxDB data source configuration with correct org, bucket, and token
